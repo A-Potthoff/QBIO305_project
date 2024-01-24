@@ -1,0 +1,27 @@
+###
+# Subset VCF file using annotated gff file | This part is implemented in the Linux terminal
+# VCF file is downloaded using this command:
+$ wget https://1001genomes.org/data/GMI-MPI/releases/v3.1/1001genomes_snp-short-indel_only_ACGTN.vcf.gz
+###
+
+# apply quality filters on variants in the VCF file
+$ vcftools --gzvcf 1001genomes_snp-short-indel_only_ACGTN.vcf.gz --minDP 10 --minGQ 20 --minQ 30 --max-missing 0.80 --remove-indels --max-alleles 2 --recode --recode-INFO-all --stdout | bgzip -c > /scratch/QBIO/VCF/1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz
+
+# Keep only selected accessions from the VCF file
+$ vcftools --gzvcf /scratch/QBIO/VCF/1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz --keep /scratch/QBIO/student_project_data/group_4_accession_names.txt --recode --recode-INFO-all --stdout | bgzip -c > /scratch/QBIO/student_project_data/group_4_accession_1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz
+
+# grep required genes from annotated gff file with coordinates
+$ grep -e "RARE COLD INDUCIBLE GENE 3" -e "ERD (early response to dehydration)" -e "Responsive to dehydration" -e "Chloroplastic drought-induced stress protein" -e "RESPONSIVE TO DEHYDRATION 19" -e "ERD2" -e "BCL-2-associated athanogene" -e "alpha-crystallin domain 32.1" -e "ATERDJ3B" -e "HSP" -e "Heat shock factor" GFF_final_with_annotation_2_gff > group_4_At_heat_cold_dehydration_stress_only.gff
+
+# select columns from filtered gff and save as bed file
+$ awk '{OFS="\t"; print $2, $5, $6}' group_4_At_heat_cold_dehydration_stress_only.gff > group_4_At_heat_cold_dehydration_stress_only.bed
+
+# Filter VCF files to subset variants based on desired genomic regions (genes)
+# Make sure the formate for CHROM column in the bed file and VCF file is the same
+$ vcftools --gzvcf group_4_accession_1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz --bed group_4_At_heat_cold_dehydration_stress_only.bed --stdout --recode --keep-INFO-all | bgzip -c > group_4_final_accession_1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz
+
+# index VCF file using tabix
+$ tabix -p vcf group_4_final_accession_1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz
+$ zgrep -v "^#" group_4_final_accession_1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz | wc -l
+
+###

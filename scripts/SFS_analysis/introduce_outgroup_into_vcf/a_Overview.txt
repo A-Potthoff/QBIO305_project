@@ -1,0 +1,10 @@
+1.	Download the whole genome data of capsella rubella as a fastq file
+	a.	I downloaded https://www.ncbi.nlm.nih.gov/sra/SRX1077195%5baccn%5dis since it promised a good coverage because of its size
+
+2.	Map it on Arabidopsis thaliana to to get a bam file
+	a.	reference genome: Tair.10.1.genomic.fna
+	b.	see scripts
+
+3.	Call Snps on bam to get a second vcf
+4.	Intersect and merge
+5.	R-analysis
