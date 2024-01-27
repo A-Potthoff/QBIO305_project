@@ -1,0 +1,37 @@
+##
+## GEMMA Version    = 0.98.3 (2020-11-28)
+## Build profile    = 
+## GCC version      = 7.5.0
+## GSL Version      = 1.16
+## OpenBlas         = OpenBLAS 0.3.12  - OpenBLAS 0.3.21 DYNAMIC_ARCH NO_AFFINITY Nehalem MAX_THREADS=128
+##   arch           = Nehalem
+##   threads        = 1
+##   parallel type  = threaded
+##
+## Command Line Input = gemma --bfile sample_project_plink_filtered -p bio17.tsv -k sample_project_kinship.mibs -lmm 4 -o sample_project_GWAS 
+##
+## Date = Tue Jan  2 17:03:23 2024
+##
+## Summary Statistics:
+## number of total individuals = 120
+## number of analyzed individuals = 120
+## number of covariates = 1
+## number of phenotypes = 1
+## number of total SNPs/var = 6619
+## number of analyzed SNPs/var = 57
+## REMLE log-likelihood in the null model = -658.956
+## MLE log-likelihood in the null model = -663.915
+## pve estimate in the null model = 0.165372
+## se(pve) in the null model = 0.119721
+## vg estimate in the null model = 16667.5
+## ve estimate in the null model = 3250.92
+## beta estimate in the null model =   139.858
+## se(beta) =   5.2049
+##
+## Computation Time:
+## total computation time = 0.00183333 min 
+## computation time break down: 
+##      time on eigen-decomposition = 0.000166667 min 
+##      time on calculating UtX = 0 min 
+##      time on optimization = 0.000333333 min 
+##

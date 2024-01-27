@@ -1,0 +1,106 @@
+###################
+### Session 6: Downstream analysis
+## Learning Objectives
+# 1. GWAS
+# 2. Gene set enrichment analysis
+# 3. 
+# 5. 
+#
+# Tools to be used
+# 1. Plink
+# 2. GEMMA
+# 3. TopGo
+# 4. 
+# 3. 
+###################
+
+##########################################
+#        Genome Wide Association        ##
+#             Studies (GWAS)            ##
+##########################################
+
+
+###
+# Principle Component Analysis (PCA): This will help in identifying population structure and later correct for it. 
+# Genetic population structure is present in the sample, if the sample can be divided into groups in such a way that
+# individuals from one group are more genetically similar among themselves than with individuals from different groups.  
+# It is called structured association, where you would cluster your structured population into hopefully homogenous groups,
+# and run the association test separately in each group - therefore avoiding the effects of the structure.        
+###
+
+
+###
+# This part will be performed in Cheops terminal
+###
+
+# First step: LD pruning                
+# Can be performed using bcftools or plink: It is quicker using plink
+
+
+
+
+# LD pruning using plink: It is recommended method as works faster than bcftools
+$ plink --vcf /home/group.kurse/qbcbp013/ownProject/group_4_final_accession_1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz --indep-pairwise 50 10 0.1 --allow-extra-chr --out sample_project_plink_ldprune
+
+
+# This generates "sample_project_plink_ldprune.prune.in" & "sample_project_plink_ldprune.prune.out": 
+# the former includes variants below the LD threshold for retention, while the latter includes variants
+# above the LD threshold. "--indep-pairwise 50 10 0.1" is linkage pruning in 50kb window, with window step
+# size of 10, r squared threshold is set to 0.1, pruning any variables with r squared greater than 0.1
+
+# Perform PCA using Plink
+$ plink --vcf /home/group.kurse/qbcbp013/ownProject/group_4_final_accession_1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz --extract sample_project_plink_ldprune.prune.in --make-bed --pca --out sample_project_plink
+
+# This generates "sample_project_plink.eigenval" and "sample_project_plink.eigenvec" for PCA analysis. 
+# Use option "--make-bed" for additional files needed for ADMIXTURE,  The binary files "sample_project_plink.bed" & 
+# "sample_project_plink.bim," and "sample_project_plink.fam" are produced, which will be utilized in GWAS.
+
+
+###
+# This part will be again performed in Cheops terminal
+###
+
+# Before conducting GWAS extract chr 1 to 5 only using Plink
+$ plink --bfile sample_project_plink --chr 1-5 --allow-extra-chr --make-bed --out sample_project_plink_filtered
+
+# Make plink files
+$ plink --vcf /home/group.kurse/qbcbp013/ownProject/group_4_final_accession_1001genomes_snp-short-indel_only_ACGTN_Dp10GQ20Q30_NoIndel_Bialleleic_80PcMissing.vcf.gz --make-bed --out sample_project_plink_filtered
+
+# If required one can create map and ped files
+$ plink --bfile sample_project_plink_filtered --recode --tab --out sample_project_plink_filtered
+
+# create kinship first using plink
+
+$ plink --bfile sample_project_plink_filtered --cluster --matrix --out sample_project_kinship
+
+####################
+# You can also create kinship using gemma
+# $ gemma --bfile sample_project_plink_filtered -p phenotype_file.txt -gk -o sample_project_kinship
+###########################
+
+#########################
+#      Conduct          #
+#   GWAS using gemma    #
+#########################
+
+# Install "gemma" on Cheops
+$ module load miniconda
+$ conda create -n gemma
+$ conda activate gemma
+$ conda install -c bioconda gemma
+
+# NOTE: that the phenotype.txt file only contains values of the phenotype, and must be in the same order of the samples in vcf file
+# can contain different phenotypes in different columns : -n 1 is to choose phenotype 1 if data contains multiple phenotypes
+# n: specify phenotype column in the phenotype file (default 1); or to specify which phenotypes aresed in the mvLMM analysis
+# lmm: specify frequentist analysis choice (default 1; valid value 1-4; 1: Wald test; 2: likelihood ratio test; 3: score test; 4: all 1-3.)
+# lmm 4 is to run linear mixed model with kinship
+# o: specify output file prefix
+
+# miss: specify missingness threshold (default 0.05)
+# r2: specify r-squared threshold (default 0.9999)
+# hwe: specify HWE test p value threshold (default 0; no test)
+# maf: specify minor allele frequency threshold (default 0.01)
+
+# adjust the name ("bio1.tsv") according to the generated climate variables 
+
+$ gemma --bfile sample_project_plink_filtered -p bio1.tsv -n 1 -k sample_project_kinship.mibs -lmm 4 -o sample_project_GWAS2 -miss 0.9 -r2 1 -hwe 0 -maf 0.05
